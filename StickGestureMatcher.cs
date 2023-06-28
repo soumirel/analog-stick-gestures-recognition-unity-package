@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityEngine;
 
-namespace Project.StickFlickShapesRecognition.Scripts
+namespace Project.StickGestures.Scripts
 {
     public class StickGestureMatcher
     {
@@ -69,15 +68,18 @@ namespace Project.StickFlickShapesRecognition.Scripts
         }
 
 
-        public void AddToken(char token)
+        public bool TryContinuePattern(char token)
         {
             _matchingPattern.Append(token);
+            
             try
             {
                 _currentNode = _currentNode.Children.First(n => n.Value == token);
+                return true;
             }
             catch (InvalidOperationException e)
             {
+                return false;
             }
         }
 
@@ -95,7 +97,7 @@ namespace Project.StickFlickShapesRecognition.Scripts
         }
         
         
-        public bool CheckPartialMatching()
+        public bool CheckContinuePatternPossibility()
         {
             return _currentNode.Children.Count > 0;
         }

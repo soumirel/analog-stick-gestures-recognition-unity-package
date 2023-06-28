@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Project.StickFlickShapesRecognition.Scripts
+namespace Project.StickGestures.Scripts
 {
     [Serializable]
     public class StickGesture

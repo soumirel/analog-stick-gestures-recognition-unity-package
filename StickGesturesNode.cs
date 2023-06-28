@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Project.StickFlickShapesRecognition.Scripts
+namespace Project.StickGestures.Scripts
 {
     public class StickGesturesNode
     {

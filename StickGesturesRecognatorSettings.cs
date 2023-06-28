@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Project.StickFlickShapesRecognition.Scripts
+namespace Project.StickGestures.Scripts
 {
     [CreateAssetMenu(fileName = "ShapeRecognitionSettings", menuName = "Settings/ShapeRecognition", order = 0)]
     public class StickGesturesRecognatorSettings : ScriptableObject

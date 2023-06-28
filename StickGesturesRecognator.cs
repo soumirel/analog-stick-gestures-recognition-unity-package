@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using Project.StickFlickShapesRecognition.Scripts;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Project.StickFlickShapes.Scripts
+namespace Project.StickGestures.Scripts
 {
     public class StickGesturesRecognator : MonoBehaviour
     {
         const int ZONES_COUNT = 8;
+        const float ZONES_PER_RADIAN = ZONES_COUNT / (2 * Mathf.PI);
         
         [SerializeField] private StickGesturesRecognatorSettings _settings;
         
@@ -135,45 +134,43 @@ namespace Project.StickFlickShapes.Scripts
 
             if (_onRecognition)
             {
-                if (ProgressFlick(_stickPosition))
+                var visitingZone = DetermineZone(_stickPosition);
+                if (_lastVisitedZone != visitingZone)
                 {
-                    if (_matcher.Match(out var gesture))
+                    _lastVisitedZone = visitingZone;
+                    if (_matcher.TryContinuePattern((char)('A' + _lastVisitedZone)))
                     {
-                        _recognizedGesture = gesture;
-                        _onRecognized = true;
-                        _secondsAfterRecognition = 0;
-                        
-                        if (!_matcher.CheckPartialMatching())
+                        if (_matcher.Match(out var gesture))
                         {
-                            FinishRecognition();
+                            _recognizedGesture = gesture;
+                            _onRecognized = true;
+                            _secondsAfterRecognition = 0;
+                        
+                            if (!_matcher.CheckContinuePatternPossibility())
+                            {
+                                FinishRecognition();
+                            }
                         }
+                    }
+                    else
+                    {
+                        FinishRecognition();
                     }
                 }
             }
         }
-        
-        
-        // Try appending a new entry to the combo.
-        bool ProgressFlick(Vector2 stick) {        
-            const float BUCKETS_PER_RADIAN = ZONES_COUNT / (2 * Mathf.PI);
 
-            // Get the angle of the stick, and round it to one of a fixed number of buckets.
+
+        private int DetermineZone(Vector2 stick)
+        {
             float angle = Mathf.Atan2(-stick.x, -stick.y);
-            int visitingZone = Mathf.RoundToInt(angle * BUCKETS_PER_RADIAN + ZONES_COUNT / 2.0f) % ZONES_COUNT;
-            // If we've changed buckets, add a new letter to our combo.
-            if (visitingZone != _lastVisitedZone) {
-                _matcher.AddToken((char)('A' + visitingZone));
-                _lastVisitedZone = visitingZone;
-                Debug.Log(_lastVisitedZone);
-                return true;
-            }
-            // Otherwise, nothing new to report.
-            return false;
+            int visitingZone = Mathf.RoundToInt(angle * ZONES_PER_RADIAN + ZONES_COUNT / 2.0f) % ZONES_COUNT;
+            return visitingZone;
         }
+        
 
         private void StartRecognition()
         {
-            print("StartRecognition");
             _readyToRecognition = false;
             _onRecognition = true;
             
@@ -192,7 +189,7 @@ namespace Project.StickFlickShapes.Scripts
             }
             else
             {
-                Debug.Log($"Unknown pattern: {_matcher.CurrentPattern}");
+                Debug.Log($"There is no pattern starting with: {_matcher.CurrentPattern}");
             }
             
             _onRecognition = false;
